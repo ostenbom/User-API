@@ -51,4 +51,4 @@ class Voter(models.Model):
     used_vote = models.BooleanField(default=False)
 
     def __str__(self):
-        return first_name + ' ' + last_name
+        return self.first_name + ' ' + self.last_name
