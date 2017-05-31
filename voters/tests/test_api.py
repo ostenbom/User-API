@@ -83,7 +83,7 @@ class CheckVotabilityTests(TestCase):
 class GetVoterAPITests(TestCase):
 
     def test_endpoint_returns_response(self):
-        url = reverse('voters:get_voter',  args=(12, "James", "TW9 4EQ"))
+        url = reverse('voters:get_voters',  args=(NON_EXIST_VOTER_PK, "James", "TW9 4EQ",))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
@@ -91,7 +91,7 @@ class GetVoterAPITests(TestCase):
     def test_can_retrieve_voter_who_exists(self):
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
-        url = reverse('voters:get_voter', args=(1, "James", "SW7 3BH",))
+        url = reverse('voters:get_voters', args=(ELIGIBLE_VOTER_PK, "James", "SW7 3BH",))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
@@ -100,9 +100,33 @@ class GetVoterAPITests(TestCase):
     def test_retrieving_voter_who_does_not_exist_returns_false(self):
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
-        url = reverse('voters:get_voter', args=(1, "Jenny", "TW9 4EQ",))
+        url = reverse('voters:get_voters', args=(1, "Jenny", "TW9 4EQ",))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {'success' : False,
            'voters' : [] })
+
+class MakeVoterIneligibleAPITests(TestCase):
+
+    def test_endpoint_returns_response(self):
+        url = reverse('voters:make_voter_ineligible',  args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_make_existing_voter_ineligible(self):
+        create_eligible_voter(station=create_station(
+            constituency=create_constituency()))
+        url = reverse('voters:make_voter_ineligible',  args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {'success': True})
+
+    def test_make_non_existing_voter_ineligible(self):
+        url = reverse('voters:make_voter_ineligible',  args=(NON_EXIST_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {'success': False})

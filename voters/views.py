@@ -21,9 +21,18 @@ def check_votable(request, voter_id):
         return JsonResponse({'voter_exists': False,
                              'used_vote': None})
 
-def get_voter(request, station_id, voter_name, postcode):
-        voters = Voter.objects.filter(station=station_id, first_name=voter_name, postcode=postcode)
-        voters_json = json.loads(serializers.serialize("json", voters))
+def get_voters(request, station_id, voter_name, postcode):
+    voters = Voter.objects.filter(station=station_id, first_name=voter_name, postcode=postcode)
+    voters_json = json.loads(serializers.serialize("json", voters))
 
-        return JsonResponse({'success' : voters.count() > 0,
-           'voters' : voters_json })
+    return JsonResponse({'success' : voters.count() > 0,
+       'voters' : voters_json })
+
+def make_voter_ineligible(request, voter_id):
+    try:
+        voter = Voter.objects.get(pk=voter_id)
+        voter.used_vote = True
+        voter.save()
+        return JsonResponse({'success' : True})
+    except ObjectDoesNotExist:
+        return JsonResponse({'success' : False})
