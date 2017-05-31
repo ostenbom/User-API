@@ -9,5 +9,3 @@ deploy:
   region: eu-west-2
   app: e-lection-voter-api
   env: django-env
-  on:
-    repo: E-lection/Voter-API
