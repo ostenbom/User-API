@@ -27,19 +27,12 @@ SECRET_KEY = '_+ks9@#8l37=@e@1%q!2=eolst-582p+qw1&d@&*j0pxyfdgw$'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+        '127.0.0.1',
+        'localhost',
         'voting.eelection.co.uk',
         '.compute-1.amazonaws.com',
         '.elasticbeanstalk.com'
         ]
-
-EC2_PRIVATE_IP  =   None
-try:
-    EC2_PRIVATE_IP  =   requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout = 0.01).text
-except requests.exceptions.RequestException:
-    pass
-
-if EC2_PRIVATE_IP:
-    ALLOWED_HOSTS.append(EC2_PRIVATE_IP)
 
 
 # Application definition
