@@ -9,3 +9,4 @@ deploy:
   region: eu-west-2
   app: e-lection-voter-api
   env: django-env
+  bucket_name: "elasticbeanstalk-eu-west-2-699181153619"
