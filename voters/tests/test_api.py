@@ -130,3 +130,31 @@ class MakeVoterIneligibleAPITests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {'success': False})
+
+class GetConstituenciesTests(TestCase):
+
+    def test_returns_response(self):
+        url = reverse('voters:get_constituencies')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_returns_empty_list_if_no_constituencies(self):
+        url = reverse('voters:get_constituencies')
+        response = self.client.get(url)
+
+        self.assertJSONEqual(response.content, {'constituencies': []})
+
+    def test_returns_list_of_constituencies(self):
+        create_constituency()
+        url = reverse('voters:get_constituencies')
+        response = self.client.get(url)
+
+        self.assertJSONEqual(response.content, {'constituencies': [{
+                                                    'pk': 1,
+                                                    'model': 'voters.constituency',
+                                                    'fields': {
+                                                      'name': 'Richmond Park'
+                                                    }
+                                                  }]
+                                                })
