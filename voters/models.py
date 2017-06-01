@@ -15,7 +15,7 @@ class Station(models.Model):
     # Station Location
     name = models.CharField(max_length=100)
     addr_line_1 = models.CharField(max_length=100)
-    addr_line_2 = models.CharField(max_length=100)
+    addr_line_2 = models.CharField(max_length=100, null=True, blank=True)
     postcode = models.CharField(max_length=8)
 
     # Station Constituency
@@ -34,7 +34,7 @@ class Voter(models.Model):
 
     # Voter Location
     addr_line_1 = models.CharField(max_length=100)
-    addr_line_2 = models.CharField(max_length=100)
+    addr_line_2 = models.CharField(max_length=100, null=True, blank=True)
     postcode = models.CharField(max_length=8)
 
     # Voter Details
