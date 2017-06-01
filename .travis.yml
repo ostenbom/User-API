@@ -1,3 +1,12 @@
 language: python
-python: "2.7"
-script: "python manage.py test voters"
+python: '2.7'
+script: python manage.py test voters
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: AKIAILL4W3RIQMZAFTPQ
+  secret_access_key:
+    secure: D7U3XMiY4pVMXJFHRWi4MkeoF/OyZ21/e9AYXPAhElCo72TCyCN+5TBz660Zr5TMa+S7PbO24EyKo/0rs7SPCThw5AUqCuC/ET3q4zeNEmUqUp+dGsszPWWRDkObzu3NY3GUEx3ftxzSiQ2f2TfH3Dsc/8WRkxA43GG0nsKHJfqfUyoiIh5FVGUfZysefdlt45dXDklTaSKhVbtLuzOhngyHb78yWXu7jNC+8+GceqNXbQHU1JikQ6fRM0E0JQNyTaBRqZrrIEkY2bCNNRZXt41Xyfc6TYBqgVyoTpoofEvoMH2fEVokFG2kwjAjLPaqhjDScEFiCMw5Sbgaroe+MUy9ngkMvR76whgfkfMvLZP9v8HgQao/0UFS3yX+ADHUbCP0BHiZ9rTn6hviDubaLhYgo6WhP1CmZpkvyxiT6eZ5Qf3vRAudbu84HpMFhIwA9FlEiQWLTDVApaMiZ8FTZyS12plDO+SJ76FsPeV57NRKStEigoKLGiJgiPK7OetSSLX7yiIU9PxiJ/29iF6tit3ztVaAahoaJNHERkyWXKwtU90ZUgE5YBlfAffkEvMpaGXX5Y+y2cMh1cGVAfIHn1c+/bpT3D7WHZ61FhV0cIcnRKHlmvtSTfx7N2aM9m707/z9veZVwHXmCE4k9QOkY0uFKDJW1Et97FMyRCF/B3A=
+  region: eu-west-2
+  app: e-lection-voter-api
+  env: django-env
+  bucket_name: "elasticbeanstalk-eu-west-2-699181153619"
