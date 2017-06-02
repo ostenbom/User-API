@@ -39,7 +39,7 @@ class StationModelTests(TestCase):
         station = create_station(constituency=create_constituency())
         self.assertEqual(str(station), station.name)
 
-    def test_delete_voter_doesnt_delete_station(self):
+    def test_delete_station_doesnt_delete_constituency(self):
         constituency = create_constituency()
         constituency.save()
         station = create_station(constituency)
@@ -82,3 +82,18 @@ class CandidateModelTests(TestCase):
     def test_string_representation(self):
         candidate = create_candidate(constituency=create_constituency(), party=create_party())
         self.assertEqual(str(candidate), candidate.first_name + ' ' + candidate.last_name)
+
+    def test_delete_candidate_doesnt_delete_party_and_constituency(self):
+        constituency = create_constituency()
+        constituency.save()
+        party = create_party()
+        party.save()
+        candidate = create_candidate(constituency=constituency, party=party)
+        candidate.save()
+
+        candidate.delete()
+        saved_party = Party.objects.get(name=party.name)
+        saved_constituency = Constituency.objects.get(name=constituency.name)
+        self.assertEqual(Candidate.objects.all().count(), 0)
+        self.assertEqual(saved_party.name, party.name)
+        self.assertEqual(saved_constituency.name, constituency.name)

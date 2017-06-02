@@ -71,13 +71,11 @@ class Candidate(models.Model):
 
     constituency = models.ForeignKey(
         Constituency,
-        #TODO worry about delete
         on_delete=models.CASCADE
     )
 
     party = models.ForeignKey(
         Party,
-        #TODO worry about delete
         on_delete=models.CASCADE
     )
 
