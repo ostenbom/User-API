@@ -13,8 +13,8 @@ NON_EXIST_VOTER_PK = 23
 CANDIDATE_PK = 1
 PARTY_PK = 1
 STATION_PK = 1
+INVALID_STATION_PK = 47
 CONSTITUENCY_PK = 1
-INVALID_CONSTITUENCY_PK = 47
 RESPONSE_OK = 200
 
 ELIGIBLE_VOTER_JSON = json.dumps({'success': True,
@@ -56,7 +56,7 @@ def create_eligible_voter(station):
 
 
 def create_ineligable_voter(station):
-    return Voter.objects.create(pk=INELIGIBLE_VOTER_PK, first_name="James", last_name="Bond", addr_line_1="007 Spy Street", addr_line_2="", postcode="SW7 3BH", date_of_birth=datetime.date(1970, 7, 7), phone="+447654353205", station=station, used_vote=True)
+    return Voter.objects.create(pk=INELIGIBLE_VOTER_PK, first_name="James", last_name="Bond", addr_line_1="007 Spy Street", addr_line_2="", postcode="SW7 3BH", date_of_birth=datetime.date(1970, 7, 7), phone="+447654353007", station=station, used_vote=True)
 
 def create_party():
     return Party.objects.create(pk=PARTY_PK, name="Labour")
@@ -164,21 +164,23 @@ class MakeVoterIneligibleAPITests(TestCase):
 class CandidateAPITests(TestCase):
 
     def test_endpoint_returns_response(self):
-        url = reverse('voters:get_candidates', args=(CONSTITUENCY_PK,))
+        url = reverse('voters:get_candidates', args=(STATION_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
     def test_endpoint_returns_candidates(self):
-        create_candidate(constituency=create_constituency(), party=create_party())
-        url = reverse('voters:get_candidates', args=(CONSTITUENCY_PK,))
+        constituency = create_constituency()
+        station = create_station(constituency)
+        create_candidate(constituency=constituency, party=create_party())
+        url = reverse('voters:get_candidates', args=(STATION_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, CANDIDATE_JSON)
 
     def test_endpoint_returns_error_for_invalid_constituency(self):
-        url = reverse('voters:get_candidates', args=(INVALID_CONSTITUENCY_PK,))
+        url = reverse('voters:get_candidates', args=(INVALID_STATION_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)

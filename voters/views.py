@@ -5,7 +5,7 @@ from django.core import serializers
 from django.http import JsonResponse, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Voter, Candidate
+from .models import Voter, Candidate, Station
 
 
 def index(request):
@@ -41,9 +41,13 @@ def make_voter_ineligible(request, voter_id):
         return JsonResponse({'success': False})
 
 
-def get_candidates(request, constituency_id):
-    candidates = Candidate.objects.filter(constituency=constituency_id)
-    candidates_json = json.loads(serializers.serialize("json", candidates))
-
-    return JsonResponse({'success': candidates.count() > 0,
+def get_candidates(request, station_id):
+    try:
+        constituency = Station.objects.get(pk=station_id).constituency.pk
+        candidates = Candidate.objects.filter(constituency=constituency)
+        candidates_json = json.loads(serializers.serialize("json", candidates))
+        return JsonResponse({'success': candidates.count() > 0,
                          'candidates': candidates_json})
+    except ObjectDoesNotExist:
+        return JsonResponse({'success': False,
+                             'candidates': []})
