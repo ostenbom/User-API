@@ -38,8 +38,8 @@ CANDIDATE_JSON = json.dumps({'success': True,
                                     'model': 'voters.candidate',
                                     'fields': {'first_name': 'Jeremy',
                                                'last_name': 'Corbyn',
-                                               'constituency': CONSTITUENCY_PK,
-                                               'party' : PARTY_PK }}]
+                                               'constituency': 'Richmond Park',
+                                               'party' : 'Labour' }}]
                                   }, sort_keys=True)
 
 

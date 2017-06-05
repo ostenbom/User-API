@@ -6,6 +6,9 @@ from django.db import models
 class Constituency(models.Model):
     name = models.CharField(max_length=40)
 
+    def natural_key(self):
+        return self.name
+
     def __str__(self):
         return self.name
 
@@ -59,6 +62,9 @@ class Voter(models.Model):
 
 class Party(models.Model):
     name = models.CharField(max_length=100)
+
+    def natural_key(self):
+        return self.name
 
     def __str__(self):
         return self.name

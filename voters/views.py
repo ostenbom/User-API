@@ -45,9 +45,11 @@ def get_candidates(request, station_id):
     try:
         constituency = Station.objects.get(pk=station_id).constituency.pk
         candidates = Candidate.objects.filter(constituency=constituency)
-        candidates_json = json.loads(serializers.serialize("json", candidates))
+        candidates_json = json.loads(serializers.serialize(
+            "json", candidates, use_natural_foreign_keys=True))
+        print candidates_json
         return JsonResponse({'success': candidates.count() > 0,
-                         'candidates': candidates_json})
+                             'candidates': candidates_json})
     except ObjectDoesNotExist:
         return JsonResponse({'success': False,
                              'candidates': []})
