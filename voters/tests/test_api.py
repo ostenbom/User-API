@@ -3,6 +3,8 @@ import datetime
 
 from django.test import TestCase
 from django.urls import reverse
+from django.http.cookie import SimpleCookie
+from mock import patch
 
 from ..models import Constituency, Station, Voter, Party, Candidate
 from ..views import check_votable
@@ -15,7 +17,10 @@ PARTY_PK = 1
 STATION_PK = 1
 INVALID_STATION_PK = 47
 CONSTITUENCY_PK = 1
+
 RESPONSE_OK = 200
+RESPONSE_UNAUTHORIZED = 401
+RESPONSE_FORBIDDEN = 403
 
 ELIGIBLE_VOTER_JSON = json.dumps({'success': True,
                                   'voters':
@@ -67,13 +72,41 @@ def create_candidate(constituency, party):
 
 class CheckVotabilityTests(TestCase):
 
-    def test_endpoint_returns_response(self):
+    def test_endpoint_returns_unauthorized_without_API_key(self):
+        url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, RESPONSE_UNAUTHORIZED)
+
+    @patch('voters.views.valid_api_key', return_value=False)
+    def test_endpoint_returns_unauthorized_for_invalid_API_key(self, *_):
+        url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, RESPONSE_UNAUTHORIZED)
+
+    @patch('voters.views.has_check_votable_permissions', return_value=False)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_forbidden_with_valid_API_key_insufficient_priviledges(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 1234})
+        url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, RESPONSE_FORBIDDEN)
+
+    @patch('voters.views.has_check_votable_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_response_for_valid_API_key(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
-    def test_eligible_voter_can_vote(self):
+    @patch('voters.views.has_check_votable_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_eligible_voter_can_vote(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
@@ -83,7 +116,10 @@ class CheckVotabilityTests(TestCase):
         self.assertJSONEqual(response.content, {'voter_exists': True,
                                                 'used_vote': False})
 
-    def test_ineligible_cannot_vote(self):
+    @patch('voters.views.has_check_votable_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_ineligible_cannot_vote(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_ineligable_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:check_votable', args=(INELIGIBLE_VOTER_PK,))
@@ -93,26 +129,35 @@ class CheckVotabilityTests(TestCase):
         self.assertJSONEqual(response.content, {'voter_exists': True,
                                                 'used_vote': True})
 
-    def test_non_existent_voter_returns_false(self):
+
+    @patch('voters.views.has_check_votable_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_non_existent_voter_returns_false(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:check_votable', args=(NON_EXIST_VOTER_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'voter_exists': False,
                                                 'used_vote': None})
-    # Invalid API user errors TODO
 
 
 class GetVoterAPITests(TestCase):
 
-    def test_endpoint_returns_response(self):
+    @patch('voters.views.has_get_voters_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_response(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_voters',  args=(
             NON_EXIST_VOTER_PK, "James", "TW9 4EQ",))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
-    def test_can_retrieve_voter_who_exists(self):
+    @patch('voters.views.has_get_voters_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_can_retrieve_voter_who_exists(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:get_voters', args=(
@@ -122,7 +167,10 @@ class GetVoterAPITests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, ELIGIBLE_VOTER_JSON)
 
-    def test_retrieving_voter_who_does_not_exist_returns_false(self):
+    @patch('voters.views.has_get_voters_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_retrieving_voter_who_does_not_exist_returns_false(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:get_voters', args=(STATION_PK, "Jenny", "TW9 4EQ",))
@@ -135,14 +183,20 @@ class GetVoterAPITests(TestCase):
 
 class MakeVoterIneligibleAPITests(TestCase):
 
-    def test_endpoint_returns_response(self):
+    @patch('voters.views.has_make_voter_ineligible_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_response(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:make_voter_ineligible',
                       args=(ELIGIBLE_VOTER_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
-    def test_make_existing_voter_ineligible(self):
+    @patch('voters.views.has_make_voter_ineligible_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_make_existing_voter_ineligible(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:make_voter_ineligible',
@@ -152,7 +206,10 @@ class MakeVoterIneligibleAPITests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'success': True})
 
-    def test_make_non_existing_voter_ineligible(self):
+    @patch('voters.views.has_make_voter_ineligible_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_make_non_existing_voter_ineligible(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:make_voter_ineligible',
                       args=(NON_EXIST_VOTER_PK,))
         response = self.client.get(url)
@@ -163,13 +220,19 @@ class MakeVoterIneligibleAPITests(TestCase):
 
 class CandidateAPITests(TestCase):
 
-    def test_endpoint_returns_response(self):
+    @patch('voters.views.has_get_candidates_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_response(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_candidates', args=(STATION_PK,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
-    def test_endpoint_returns_candidates(self):
+    @patch('voters.views.has_get_candidates_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_candidates(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         constituency = create_constituency()
         station = create_station(constituency)
         create_candidate(constituency=constituency, party=create_party())
@@ -179,7 +242,10 @@ class CandidateAPITests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, CANDIDATE_JSON)
 
-    def test_endpoint_returns_error_for_invalid_constituency(self):
+    @patch('voters.views.has_get_candidates_permissions', return_value=True)
+    @patch('voters.views.valid_api_key', return_value=True)
+    def test_endpoint_returns_error_for_invalid_constituency(self, *_):
+        self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_candidates', args=(INVALID_STATION_PK,))
         response = self.client.get(url)
 
