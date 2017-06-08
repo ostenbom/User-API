@@ -78,7 +78,7 @@ class CheckVotabilityTests(TestCase):
 
         self.assertEqual(response.status_code, RESPONSE_UNAUTHORIZED)
 
-    @patch('voters.views.valid_api_key', return_value=False)
+    @patch('voters.api_utils.valid_api_key', return_value=False)
     def test_endpoint_returns_unauthorized_for_invalid_API_key(self, *_):
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
         response = self.client.get(url)
@@ -86,7 +86,7 @@ class CheckVotabilityTests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_UNAUTHORIZED)
 
     @patch('voters.views.has_check_votable_permissions', return_value=False)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_forbidden_with_valid_API_key_insufficient_priviledges(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 1234})
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
@@ -95,7 +95,7 @@ class CheckVotabilityTests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_FORBIDDEN)
 
     @patch('voters.views.has_check_votable_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_response_for_valid_API_key(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
@@ -104,7 +104,7 @@ class CheckVotabilityTests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
 
     @patch('voters.views.has_check_votable_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_eligible_voter_can_vote(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
@@ -117,7 +117,7 @@ class CheckVotabilityTests(TestCase):
                                                 'used_vote': False})
 
     @patch('voters.views.has_check_votable_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_ineligible_cannot_vote(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_ineligable_voter(station=create_station(
@@ -131,7 +131,7 @@ class CheckVotabilityTests(TestCase):
 
 
     @patch('voters.views.has_check_votable_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_non_existent_voter_returns_false(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:check_votable', args=(NON_EXIST_VOTER_PK,))
@@ -145,7 +145,7 @@ class CheckVotabilityTests(TestCase):
 class GetVoterAPITests(TestCase):
 
     @patch('voters.views.has_get_voters_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_response(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_voters',  args=(
@@ -155,7 +155,7 @@ class GetVoterAPITests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
 
     @patch('voters.views.has_get_voters_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_can_retrieve_voter_who_exists(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
@@ -168,7 +168,7 @@ class GetVoterAPITests(TestCase):
         self.assertJSONEqual(response.content, ELIGIBLE_VOTER_JSON)
 
     @patch('voters.views.has_get_voters_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_retrieving_voter_who_does_not_exist_returns_false(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
@@ -184,7 +184,7 @@ class GetVoterAPITests(TestCase):
 class MakeVoterIneligibleAPITests(TestCase):
 
     @patch('voters.views.has_make_voter_ineligible_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_response(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:make_voter_ineligible',
@@ -194,7 +194,7 @@ class MakeVoterIneligibleAPITests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
 
     @patch('voters.views.has_make_voter_ineligible_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_make_existing_voter_ineligible(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         create_eligible_voter(station=create_station(
@@ -207,7 +207,7 @@ class MakeVoterIneligibleAPITests(TestCase):
         self.assertJSONEqual(response.content, {'success': True})
 
     @patch('voters.views.has_make_voter_ineligible_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_make_non_existing_voter_ineligible(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:make_voter_ineligible',
@@ -221,7 +221,7 @@ class MakeVoterIneligibleAPITests(TestCase):
 class CandidateAPITests(TestCase):
 
     @patch('voters.views.has_get_candidates_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_response(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_candidates', args=(STATION_PK,))
@@ -230,7 +230,7 @@ class CandidateAPITests(TestCase):
         self.assertEqual(response.status_code, RESPONSE_OK)
 
     @patch('voters.views.has_get_candidates_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_candidates(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         constituency = create_constituency()
@@ -243,7 +243,7 @@ class CandidateAPITests(TestCase):
         self.assertJSONEqual(response.content, CANDIDATE_JSON)
 
     @patch('voters.views.has_get_candidates_permissions', return_value=True)
-    @patch('voters.views.valid_api_key', return_value=True)
+    @patch('voters.api_utils.valid_api_key', return_value=True)
     def test_endpoint_returns_error_for_invalid_constituency(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_candidates', args=(INVALID_STATION_PK,))

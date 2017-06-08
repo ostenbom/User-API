@@ -8,23 +8,8 @@ from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Voter, Candidate, Station
-from .api_key_verification import valid_api_key, has_check_votable_permissions, has_get_voters_permissions, has_make_voter_ineligible_permissions, has_get_candidates_permissions
-
-UNAUTHORIZED_CODE = 401
-
-def verify(verif):
-    def perform(func):
-        def inner(request, **kwargs):
-            # Does the user have an API key? (should also check they key is valid)
-            if 'API_key' in request.COOKIES and valid_api_key(request.COOKIES['API_key']):
-                # Does the user have appropriate permissions?
-                if verif()(request.COOKIES['API_key']):
-                    return func(request, **kwargs)
-                return HttpResponseForbidden()
-            return HttpResponse(status=UNAUTHORIZED_CODE)
-        return inner
-    return perform
-
+from .api_key_verification import has_check_votable_permissions, has_get_voters_permissions, has_make_voter_ineligible_permissions, has_get_candidates_permissions
+from .api_utils import verify
 
 def index(request):
     return HttpResponse("Hello, world. You're at the voter index.")
