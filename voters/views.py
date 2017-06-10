@@ -9,7 +9,7 @@ from .models import Voter, Candidate, Station
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the voter index.")
+    return HttpResponse("The Voter API is online.")
 
 
 def check_votable(request, voter_id):

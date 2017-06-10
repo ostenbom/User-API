@@ -81,7 +81,10 @@ class CandidateModelTests(TestCase):
 
     def test_string_representation(self):
         candidate = create_candidate(constituency=create_constituency(), party=create_party())
-        self.assertEqual(str(candidate), candidate.first_name + ' ' + candidate.last_name)
+        self.assertEqual(str(candidate), (candidate.first_name + ' '
+                                            + candidate.last_name + ' - '
+                                            + str(candidate.constituency)
+                                            + ' - ' + str(candidate.party)))
 
     def test_delete_candidate_doesnt_delete_party_and_constituency(self):
         constituency = create_constituency()
