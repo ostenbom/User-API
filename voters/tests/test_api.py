@@ -29,6 +29,7 @@ ELIGIBLE_VOTER_JSON = json.dumps({'success': True,
                                                'date_of_birth': '1970-07-07',
                                                'phone': '+447654353205',
                                                'used_vote': False,
+                                               'active_pin': False,
                                                'station': STATION_PK}}]
                                   }, sort_keys=True)
 
