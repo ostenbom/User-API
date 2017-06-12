@@ -41,13 +41,23 @@ def make_voter_ineligible(request, voter_id):
         return JsonResponse({'success': False})
 
 
+def set_voter_has_active_pin(request, voter_id):
+    try:
+        voter = Voter.objects.get(pk=voter_id)
+        voter.active_pin = True
+        voter.save()
+        return JsonResponse({'success': True})
+    except ObjectDoesNotExist:
+        return JsonResponse({'success': False})
+
+
 def get_candidates(request, station_id):
     try:
         constituency = Station.objects.get(pk=station_id).constituency.pk
         candidates = Candidate.objects.filter(constituency=constituency)
         candidates_json = json.loads(serializers.serialize(
             "json", candidates, use_natural_foreign_keys=True))
-        print candidates_json
+
         return JsonResponse({'success': candidates.count() > 0,
                              'candidates': candidates_json})
     except ObjectDoesNotExist:
