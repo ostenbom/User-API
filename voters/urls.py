@@ -15,6 +15,8 @@ urlpatterns = [
         POSTCODE_REGEX + ')/$', views.get_voters, name='get_voters'),
     url(r'^make_voter_ineligible/(?P<voter_id>' + ID_REGEX + ')/$',
         views.make_voter_ineligible, name='make_voter_ineligible'),
+    url(r'^set_voter_has_active_pin/(?P<voter_id>' + ID_REGEX + ')/$',
+        views.set_voter_has_active_pin, name='set_voter_has_active_pin'),
     url(r'^get_candidates/(?P<station_id>' + ID_REGEX + ')/$',
         views.get_candidates, name='get_candidates')
 ]

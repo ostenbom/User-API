@@ -29,18 +29,19 @@ ELIGIBLE_VOTER_JSON = json.dumps({'success': True,
                                                'date_of_birth': '1970-07-07',
                                                'phone': '+447654353205',
                                                'used_vote': False,
+                                               'active_pin': False,
                                                'station': STATION_PK}}]
                                   }, sort_keys=True)
 
 CANDIDATE_JSON = json.dumps({'success': True,
-                                  'candidates':
-                                  [{'pk': CANDIDATE_PK,
-                                    'model': 'voters.candidate',
-                                    'fields': {'first_name': 'Jeremy',
-                                               'last_name': 'Corbyn',
-                                               'constituency': 'Richmond Park',
-                                               'party' : 'Labour' }}]
-                                  }, sort_keys=True)
+                             'candidates':
+                             [{'pk': CANDIDATE_PK,
+                               'model': 'voters.candidate',
+                               'fields': {'first_name': 'Jeremy',
+                                          'last_name': 'Corbyn',
+                                          'constituency': 'Richmond Park',
+                                          'party': 'Labour'}}]
+                             }, sort_keys=True)
 
 
 def create_constituency():
@@ -58,8 +59,10 @@ def create_eligible_voter(station):
 def create_ineligable_voter(station):
     return Voter.objects.create(pk=INELIGIBLE_VOTER_PK, first_name="James", last_name="Bond", addr_line_1="007 Spy Street", addr_line_2="", postcode="SW7 3BH", date_of_birth=datetime.date(1970, 7, 7), phone="+447654353007", station=station, used_vote=True)
 
+
 def create_party():
     return Party.objects.create(pk=PARTY_PK, name="Labour")
+
 
 def create_candidate(constituency, party):
     return Candidate.objects.create(pk=CANDIDATE_PK, first_name="Jeremy", last_name="Corbyn", constituency=constituency, party=party)
@@ -125,7 +128,8 @@ class GetVoterAPITests(TestCase):
     def test_retrieving_voter_who_does_not_exist_returns_false(self):
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
-        url = reverse('voters:get_voters', args=(STATION_PK, "Jenny", "TW9 4EQ",))
+        url = reverse('voters:get_voters', args=(
+            STATION_PK, "Jenny", "TW9 4EQ",))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, RESPONSE_OK)
@@ -161,6 +165,34 @@ class MakeVoterIneligibleAPITests(TestCase):
         self.assertJSONEqual(response.content, {'success': False})
 
 
+class SetVoterHasActivePinTests(TestCase):
+
+    def test_endpoint_returns_response(self):
+        url = reverse('voters:set_voter_has_active_pin',
+                      args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, RESPONSE_OK)
+
+    def test_set_existing_voter_active_pin(self):
+        create_eligible_voter(station=create_station(
+            constituency=create_constituency()))
+        url = reverse('voters:set_voter_has_active_pin',
+                      args=(ELIGIBLE_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, RESPONSE_OK)
+        self.assertJSONEqual(response.content, {'success': True})
+
+    def test_set_non_existing_voter_active_pin(self):
+        url = reverse('voters:set_voter_has_active_pin',
+                      args=(NON_EXIST_VOTER_PK,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, RESPONSE_OK)
+        self.assertJSONEqual(response.content, {'success': False})
+
+
 class CandidateAPITests(TestCase):
 
     def test_endpoint_returns_response(self):
@@ -185,4 +217,4 @@ class CandidateAPITests(TestCase):
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertEqual(response.content, json.dumps({'success': False,
-                                            'candidates': []}, sort_keys=True))
+                                                       'candidates': []}, sort_keys=True))
