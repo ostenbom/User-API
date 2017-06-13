@@ -23,11 +23,10 @@ def check_votable(request, voter_id):
 
 
 def get_voters(request, station_id, voter_name, postcode):
+    postcode = postcode.upper()
     voters = Voter.objects.filter(
         station=station_id, first_name=voter_name, postcode=postcode)
     voters_json = json.loads(serializers.serialize("json", voters))
-
-    print voters_json
 
     return JsonResponse({'success': voters.count() > 0,
                          'voters': voters_json})
