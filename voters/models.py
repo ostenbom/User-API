@@ -56,6 +56,9 @@ class Voter(models.Model):
     # If the users vote has been used
     used_vote = models.BooleanField(default=False)
 
+    # Has a PIN been created for a voter?
+    active_pin = models.BooleanField(default=False)
+
     def __str__(self):
         return self.first_name + ' ' + self.last_name
 
