@@ -23,11 +23,9 @@ def check_votable(request, voter_id):
 
 
 def get_voters(request, station_id, voter_name, postcode):
-    postcode = postcode.upper()
     voters = Voter.objects.filter(
-        station=station_id, first_name=voter_name, postcode=postcode)
+        station=station_id, first_name__iexact=voter_name, postcode__iexact=postcode)
     voters_json = json.loads(serializers.serialize("json", voters))
-
     return JsonResponse({'success': voters.count() > 0,
                          'voters': voters_json})
 
@@ -55,7 +53,7 @@ def set_voter_has_active_pin(request, voter_id):
 def get_candidates(request, station_id):
     try:
         constituency = Station.objects.get(pk=station_id).constituency.pk
-        candidates = Candidate.objects.filter(constituency=constituency)
+        candidates = Candidate.objects.filter(constituency__iexact=constituency)
         candidates_json = json.loads(serializers.serialize(
             "json", candidates, use_natural_foreign_keys=True))
 
