@@ -12,6 +12,7 @@ from .api_key_verification import verify, has_check_votable_permissions,\
 has_get_voters_permissions, has_make_voter_ineligible_permissions, \
 has_get_candidates_permissions, has_set_voter_has_active_pin_permissions
 
+
 def index(request):
     return HttpResponse("The Voter API is online.")
 
@@ -43,6 +44,7 @@ def make_voter_ineligible(request, voter_id):
         return JsonResponse({'success': True})
     except ObjectDoesNotExist:
         return JsonResponse({'success': False})
+
 
 @verify(lambda: has_set_voter_has_active_pin_permissions)
 def set_voter_has_active_pin(request, voter_id):
