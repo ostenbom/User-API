@@ -90,9 +90,8 @@ class CheckVotabilityTests(TestCase):
 
     @patch('voters.views.has_check_votable_permissions', return_value=False)
     def test_endpoint_returns_forbidden_with_valid_API_key_insufficient_priviledges(self, *_):
-        # self.client.cookies = SimpleCookie({'API_key' : 1234})
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_FORBIDDEN)
 

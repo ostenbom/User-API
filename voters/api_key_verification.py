@@ -13,10 +13,11 @@ OUTCOME_KEY = 'Basic Mk~@9e{xTM3k11(SW-C|VUeB_.aijg'
 def verify(verif):
     def perform(func):
         def inner(request, **kwargs):
+            print request.META
             # Does the user have an API key? (should also check they key is valid)
-            if 'Authorization' in request.META:
+            if 'HTTP_AUTHORIZATION' in request.META:
                 # Does the user have appropriate permissions?
-                if verif()(request.META['Authorization']):
+                if verif()(request.META['HTTP_AUTHORIZATION']):
                     return func(request, **kwargs)
                 return HttpResponseForbidden()
             return HttpResponse(status=UNAUTHORIZED_CODE)
