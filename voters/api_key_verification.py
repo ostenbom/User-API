@@ -2,21 +2,21 @@ from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 
 UNAUTHORIZED_CODE = 401
 
-STATION_KEY = 'uYx%mfq;XglNP^G1OSKv/]z=!S!K*y'
-BOOTH_KEY = '*qGf_P$@mokuQhOaV1^q5}*WfX]3FU'
-VOTER_KEY = '8Pqv^>#aU68x(Lcg$e>Oz++@/\"UJ.~'
-RESULTS_KEY = 'XMEtV5S]"Bok-<{W4\'2g7h7}>kkjfy'
-PINS_KEY = ';]u->is/1r]VrzL4v.HuT/@}>>@95_'
-OUTCOME_KEY = 'Mk~@9e{xTM3k11(SW-C|VUeB_.aijg'
+STATION_KEY = 'Basic uYx%mfq;XglNP^G1OSKv/]z=!S!K*y'
+BOOTH_KEY = 'Basic *qGf_P$@mokuQhOaV1^q5}*WfX]3FU'
+VOTER_KEY = 'Basic 8Pqv^>#aU68x(Lcg$e>Oz++@/\"UJ.~'
+RESULTS_KEY = 'Basic XMEtV5S]"Bok-<{W4\'2g7h7}>kkjfy'
+PINS_KEY = 'Basic ;]u->is/1r]VrzL4v.HuT/@}>>@95_'
+OUTCOME_KEY = 'Basic Mk~@9e{xTM3k11(SW-C|VUeB_.aijg'
 
 
 def verify(verif):
     def perform(func):
         def inner(request, **kwargs):
             # Does the user have an API key? (should also check they key is valid)
-            if 'HTTP_AUTHORIZATION' in request.META:
+            if 'Authorization' in request.META:
                 # Does the user have appropriate permissions?
-                if verif()(request.META['HTTP_AUTHORIZATION']):
+                if verif()(request.META['Authorization']):
                     return func(request, **kwargs)
                 return HttpResponseForbidden()
             return HttpResponse(status=UNAUTHORIZED_CODE)
