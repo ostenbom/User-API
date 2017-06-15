@@ -1,17 +1,23 @@
 import json
 import datetime
 
+from functools import partial
+
 from django.core import serializers
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Voter, Candidate, Station
+from .api_key_verification import verify, has_check_votable_permissions,\
+has_get_voters_permissions, has_make_voter_ineligible_permissions, \
+has_get_candidates_permissions, has_set_voter_has_active_pin_permissions
 
 
 def index(request):
     return HttpResponse("The Voter API is online.")
 
 
+@verify(lambda: has_check_votable_permissions)
 def check_votable(request, voter_id):
     try:
         voter = Voter.objects.get(pk=voter_id)
@@ -21,7 +27,7 @@ def check_votable(request, voter_id):
         return JsonResponse({'voter_exists': False,
                              'used_vote': None})
 
-
+@verify(lambda: has_get_voters_permissions)
 def get_voters(request, station_id, voter_name, postcode):
     voters = Voter.objects.filter(
         station=station_id, first_name__iexact=voter_name, postcode__iexact=postcode)
@@ -29,7 +35,7 @@ def get_voters(request, station_id, voter_name, postcode):
     return JsonResponse({'success': voters.count() > 0,
                          'voters': voters_json})
 
-
+@verify(lambda: has_make_voter_ineligible_permissions)
 def make_voter_ineligible(request, voter_id):
     try:
         voter = Voter.objects.get(pk=voter_id)
@@ -40,6 +46,7 @@ def make_voter_ineligible(request, voter_id):
         return JsonResponse({'success': False})
 
 
+@verify(lambda: has_set_voter_has_active_pin_permissions)
 def set_voter_has_active_pin(request, voter_id):
     try:
         voter = Voter.objects.get(pk=voter_id)
@@ -50,6 +57,7 @@ def set_voter_has_active_pin(request, voter_id):
         return JsonResponse({'success': False})
 
 
+@verify(lambda: has_get_candidates_permissions)
 def get_candidates(request, station_id):
     try:
         constituency = Station.objects.get(pk=station_id).constituency.pk
