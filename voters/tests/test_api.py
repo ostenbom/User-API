@@ -98,7 +98,7 @@ class CheckVotabilityTests(TestCase):
     @patch('voters.views.has_check_votable_permissions', return_value=True)
     def test_endpoint_returns_response_for_valid_API_key(self, *_):
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
@@ -107,7 +107,7 @@ class CheckVotabilityTests(TestCase):
         create_eligible_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:check_votable', args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'voter_exists': True,
@@ -118,7 +118,7 @@ class CheckVotabilityTests(TestCase):
         create_ineligable_voter(station=create_station(
             constituency=create_constituency()))
         url = reverse('voters:check_votable', args=(INELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'voter_exists': True,
@@ -129,7 +129,7 @@ class CheckVotabilityTests(TestCase):
     def test_non_existent_voter_returns_false(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:check_votable', args=(NON_EXIST_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'voter_exists': False,
@@ -143,7 +143,7 @@ class GetVoterAPITests(TestCase):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_voters',  args=(
             NON_EXIST_VOTER_PK, "James", "TW9 4EQ",))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
@@ -154,7 +154,7 @@ class GetVoterAPITests(TestCase):
             constituency=create_constituency()))
         url = reverse('voters:get_voters', args=(
             ELIGIBLE_VOTER_PK, "James", "SW7 3BH",))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, ELIGIBLE_VOTER_JSON)
@@ -166,7 +166,7 @@ class GetVoterAPITests(TestCase):
             constituency=create_constituency()))
         url = reverse('voters:get_voters', args=(
             STATION_PK, "Jenny", "TW9 4EQ",))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'success': False,
@@ -180,7 +180,7 @@ class MakeVoterIneligibleAPITests(TestCase):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:make_voter_ineligible',
                       args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
@@ -191,7 +191,7 @@ class MakeVoterIneligibleAPITests(TestCase):
             constituency=create_constituency()))
         url = reverse('voters:make_voter_ineligible',
                       args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'success': True})
@@ -201,7 +201,7 @@ class MakeVoterIneligibleAPITests(TestCase):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:make_voter_ineligible',
                       args=(NON_EXIST_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'success': False})
@@ -213,7 +213,7 @@ class SetVoterHasActivePinTests(TestCase):
     def test_endpoint_returns_response(self, *_):
         url = reverse('voters:set_voter_has_active_pin',
                       args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
@@ -223,7 +223,7 @@ class SetVoterHasActivePinTests(TestCase):
             constituency=create_constituency()))
         url = reverse('voters:set_voter_has_active_pin',
                       args=(ELIGIBLE_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'success': True})
@@ -232,7 +232,7 @@ class SetVoterHasActivePinTests(TestCase):
     def test_set_non_existing_voter_active_pin(self, *_):
         url = reverse('voters:set_voter_has_active_pin',
                       args=(NON_EXIST_VOTER_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, {'success': False})
@@ -244,7 +244,7 @@ class CandidateAPITests(TestCase):
     def test_endpoint_returns_response(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_candidates', args=(STATION_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
 
@@ -255,7 +255,7 @@ class CandidateAPITests(TestCase):
         station = create_station(constituency)
         create_candidate(constituency=constituency, party=create_party())
         url = reverse('voters:get_candidates', args=(STATION_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertJSONEqual(response.content, CANDIDATE_JSON)
@@ -264,7 +264,7 @@ class CandidateAPITests(TestCase):
     def test_endpoint_returns_error_for_invalid_constituency(self, *_):
         self.client.cookies = SimpleCookie({'API_key' : 12345})
         url = reverse('voters:get_candidates', args=(INVALID_STATION_PK,))
-        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : '123'})
+        response = self.client.get(url, **{'HTTP_AUTHORIZATION' : 'Basic 123'})
 
         self.assertEqual(response.status_code, RESPONSE_OK)
         self.assertEqual(response.content, json.dumps({'success': False,
