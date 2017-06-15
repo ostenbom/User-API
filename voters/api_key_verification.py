@@ -14,9 +14,9 @@ def verify(verif):
     def perform(func):
         def inner(request, **kwargs):
             # Does the user have an API key? (should also check they key is valid)
-            if 'Authorization' in request.META:
+            if 'HTTP_AUTHORIZATION' in request.META:
                 # Does the user have appropriate permissions?
-                if verif()(request.META['Authorization']):
+                if verif()(request.META['HTTP_AUTHORIZATION']):
                     return func(request, **kwargs)
                 return HttpResponseForbidden()
             return HttpResponse(status=UNAUTHORIZED_CODE)
@@ -48,26 +48,46 @@ def is_outcome(key):
     return key == OUTCOME_KEY
 
 
+# Voter-API Check Functions #
+
+
 def has_set_voter_has_active_pin_permissions(key):
-    # Do some magic stuff to verify the API key
-    return False
+    return is_pins(key)
 
 
 def has_check_votable_permissions(key):
-    # Do some magic stuff to verify the API key
-    return False
+    return is_pins(key) or is_booth(key)
 
 
 def has_get_voters_permissions(key):
-    # Do some magic stuff to verify the API key
-    return False
+    return is_station(key)
 
 
 def has_make_voter_ineligible_permissions(key):
-    # Do some magic stuff to verify the API key
-    return False
+    return is_pins(key)
 
 
 def has_get_candidates_permissions(key):
-    # Do some magic stuff to verify the API key
-    return False
+    return is_booth(key)
+
+
+# PAPI Check Functions #
+
+
+def has_get_pin_code_permissions(key):
+    return is_station(key)
+
+
+def has_verify_and_check_eligibility_permissions(key):
+    return is_results(key) or is_booth(key)
+
+
+def has_verify_and_make_ineligibile_permissions(key):
+    return is_results(key)
+
+
+# Results Check Functions #
+
+
+def has_vote_permissions(key):
+    return is_booth(key)
