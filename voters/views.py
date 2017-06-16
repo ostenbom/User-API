@@ -30,7 +30,7 @@ def check_votable(request, voter_id):
 @verify(lambda: has_get_voters_permissions)
 def get_voters(request, station_id, voter_name, postcode):
     voters = Voter.objects.filter(
-        station=station_id, first_name__iexact=voter_name, postcode__iexact=postcode)
+        station=station_id, first_name__icontains=voter_name, postcode__iexact=postcode)
     voters_json = json.loads(serializers.serialize("json", voters))
     return JsonResponse({'success': voters.count() > 0,
                          'voters': voters_json})
