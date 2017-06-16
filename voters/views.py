@@ -7,7 +7,7 @@ from django.core import serializers
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Voter, Candidate, Station
+from .models import Voter, Candidate, Station, Constituency
 from .api_key_verification import verify, has_check_votable_permissions,\
 has_get_voters_permissions, has_make_voter_ineligible_permissions, \
 has_get_candidates_permissions, has_set_voter_has_active_pin_permissions
@@ -70,3 +70,20 @@ def get_candidates(request, station_id):
     except ObjectDoesNotExist:
         return JsonResponse({'success': False,
                              'candidates': []})
+
+def voter_turnout(request):
+    constituencies = Constituency.objects.all()
+    turnout = []
+
+    for constituency in constituencies:
+        registered_voters = 0
+        num_voted = 0
+        stations = Station.objects.filter(constituency=constituency)
+        for station in stations:
+            registered_voters += Voter.objects.filter(station=station).count()
+            num_voted += Voter.objects.filter(used_vote=True, station=station).count()
+        turnout.append({'constituency' : str(constituency),
+                        'voted' : num_voted,
+                        'registered_voters' : registered_voters})
+
+    return JsonResponse({'turnout' : turnout})

@@ -9,6 +9,7 @@ NAME_REGEX = '[A-z ,.\'-]+'
 app_name = 'voters'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
+    url(r'^voter_turnout/$', views.voter_turnout, name='voter_turnout'),
     url(r'^check_votable/(?P<voter_id>' + ID_REGEX + ')/$',
         views.check_votable, name='check_votable'),
     url(r'^get_voters/station_id/(?P<station_id>' + ID_REGEX + ')/voter_name/(?P<voter_name>' + NAME_REGEX + ')/postcode/(?P<postcode>' +
