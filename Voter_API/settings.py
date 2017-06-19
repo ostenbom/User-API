@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # SSL Setup
-SECURE_SSL_REDIRECT = True  # requests over HTTP are redirected to HTTPS
+# SECURE_SSL_REDIRECT = True  # requests over HTTP are redirected to HTTPS
 # Use 'secure' cookies
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
